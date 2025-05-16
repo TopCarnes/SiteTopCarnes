@@ -1,0 +1,183 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Açougue & Mercearia Online</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f8f8f8;
+    }
+    header {
+      background-color: #b71c1c;
+      color: white;
+      padding: 1rem;
+      text-align: center;
+    }
+    .produtos, .carrinho {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-around;
+      padding: 1rem;
+    }
+    .produto {
+      background: white;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 1rem;
+      margin: 1rem;
+      width: 200px;
+      box-shadow: 2px 2px 8px rgba(0,0,0,0.1);
+    }
+    .produto img {
+      width: 100%;
+      height: auto;
+      border-radius: 4px;
+    }
+    button {
+      background-color: #b71c1c;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #d32f2f;
+    }
+    #carrinho {
+      background: #fff3e0;
+      padding: 1rem;
+      margin: 1rem;
+      border-radius: 8px;
+    }
+    form {
+      margin: 1rem;
+      padding: 1rem;
+      background-color: #e0f2f1;
+      border-radius: 8px;
+    }
+    label, input {
+      display: block;
+      margin-bottom: 0.5rem;
+    }
+    input[type="text"] {
+      padding: 0.5rem;
+      width: 100%;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Açougue & Mercearia Online</h1>
+  </header>
+
+  <section class="produtos" id="lista-produtos">
+    <!-- Produtos serão inseridos aqui via JavaScript -->
+  </section>
+
+  <section id="carrinho">
+    <h2>Carrinho</h2>
+    <ul id="itens-carrinho"></ul>
+    <p>Total: R$ <span id="total">0.00</span></p>
+  </section>
+
+  <form id="form-pedido" onsubmit="enviarPedido(event)">
+    <h2>Informações para Entrega</h2>
+    <label for="nome">Nome:</label>
+    <input type="text" id="nome" name="nome" required>
+
+    <label for="endereco">Endereço:</label>
+    <input type="text" id="endereco" name="endereco" required>
+
+    <label for="telefone">Telefone:</label>
+    <input type="text" id="telefone" name="telefone" required>
+
+    <button type="submit">Finalizar Pedido</button>
+  </form>
+
+  <script>
+    const produtos = [
+      { id: 1, nome: "Contra-filé", preco: 34.90, imagem: "https://via.placeholder.com/200" },
+      { id: 2, nome: "Linguiça Toscana", preco: 22.50, imagem: "https://via.placeholder.com/200" },
+      { id: 3, nome: "Arroz 5kg", preco: 19.99, imagem: "https://via.placeholder.com/200" },
+      { id: 4, nome: "Feijão Carioca 1kg", preco: 7.49, imagem: "https://via.placeholder.com/200" }
+    ];
+
+    const lista = document.getElementById('lista-produtos');
+    const carrinho = [];
+
+    produtos.forEach(produto => {
+      const div = document.createElement('div');
+      div.className = 'produto';
+      div.innerHTML = `
+        <img src="${produto.imagem}" alt="${produto.nome}">
+        <h3>${produto.nome}</h3>
+        <p>R$ ${produto.preco.toFixed(2)}</p>
+        <button onclick='adicionarAoCarrinho(${JSON.stringify(produto)})'>Adicionar</button>
+      `;
+      lista.appendChild(div);
+    });
+
+    function adicionarAoCarrinho(produto) {
+      carrinho.push(produto);
+      atualizarCarrinho();
+    }
+
+    function atualizarCarrinho() {
+      const listaItens = document.getElementById('itens-carrinho');
+      const totalSpan = document.getElementById('total');
+      listaItens.innerHTML = '';
+      let total = 0;
+
+      carrinho.forEach(item => {
+        const li = document.createElement('li');
+        li.textContent = `${item.nome} - R$ ${item.preco.toFixed(2)}`;
+        listaItens.appendChild(li);
+        total += item.preco;
+      });
+
+      totalSpan.textContent = total.toFixed(2);
+    }
+
+    function enviarPedido(event) {
+      event.preventDefault();
+      if (carrinho.length === 0) {
+        alert("O carrinho está vazio.");
+        return;
+      }
+
+      const nome = document.getElementById('nome').value;
+      const endereco = document.getElementById('endereco').value;
+      const telefone = document.getElementById('telefone').value;
+
+      let mensagem = `Novo pedido de ${nome}\n`;
+      mensagem += `Endereço: ${endereco}\n`;
+      mensagem += `Telefone: ${telefone}\n\n`;
+      mensagem += `Itens:\n`;
+
+      let total = 0;
+      carrinho.forEach(item => {
+        mensagem += `- ${item.nome} - R$ ${item.preco.toFixed(2)}\n`;
+        total += item.preco;
+      });
+
+      mensagem += `\nTotal: R$ ${total.toFixed(2)}`;
+
+      const telefoneLoja = '5527998586541';
+      const url = `https://wa.me/${telefoneLoja}?text=${encodeURIComponent(mensagem)}`;
+      window.open(url, '_blank');
+
+      document.getElementById('form-pedido').reset();
+      carrinho.length = 0;
+      atualizarCarrinho();
+    }
+  </script>
+</body>
+</html>
